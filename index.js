@@ -1,35 +1,20 @@
 require('dotenv').config()
-const http = require('http');
-const routeHandler = require('./route_hander');
+
 const dbHandler = require('./db_handler');
-
-const server = http.createServer(routeHandler.routeListner);
-
-routeHandler.addGet("/", ({res}) => {
-
-    console.log("get called")
-    
-    dbHandler.queryDatabase("SELECT * FROM Users;", (results, fields) => {
-
-        console.log(JSON.stringify(results[0]));
-
-        res.end(JSON.stringify(results));
-    })
-}, false, 200, { "Content-Type": "application/json" })
+const app = require('./routeHandler');
 
 
-routeHandler.addGet("/image", () => {}, true);
+app.get("/gemme", (req, res) => {
+    res.send({"gemme" : "YES"});
+});
 
-routeHandler.addGet("/gemme", () => {
-    return "gemme";
-})
+app.post("/upload", (req, res) => {
 
+    console.log(req.body);
 
-routeHandler.addPost("/gemmer", ({ query, body }) => {
-    console.log(body);
+});
 
-    return `gemmer2`;
-})
+app.static("/static", "images");
 
+app.listen(3001);
 
-server.listen(3001);

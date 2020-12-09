@@ -24,7 +24,7 @@ const MIME = {
     js: 'application/javascript'
 };
 
-function routeListner(req, res) {
+async function routeListner(req, res) {
 
     let path        = url.parse(req.url, true),
         pathname    = path.pathname,
@@ -98,10 +98,20 @@ function getAction(req, path) {
 
 
 
-function respond({ action, func_data }) {
+async function respond({ action, func_data }) {
     func_data.res.writeHead(action.status, STATUSNAMES[action.status], action.header);
-    //res.end(action.func(func_data));
-    action.func(func_data);
+
+    let promise = new Promise((res, rej) => {
+
+        res(action.func(func_data))
+        
+    });
+    
+    console.log("here")
+
+    let result = await promise;
+
+    func_data.res.end(result);
 }
 
 
