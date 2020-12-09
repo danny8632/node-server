@@ -1,4 +1,5 @@
 const mysql = require('mysql');
+const crypto = require('crypto');
 
 const connectionData = {
     host: process.env.DB_HOST,

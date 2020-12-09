@@ -2,7 +2,7 @@ require('dotenv').config()
 const mysql = require('mysql');
 const dbHandler = require('./db_handler');
 const app = require('./routeHandler');
-const crypto = require('crypto');
+
 
 
 app.get("/gemme", (req, res) => {
@@ -20,6 +20,22 @@ app.get("/gemme", (req, res) => {
 /*  ------------------------------  */
 
 app.get("/product", (req, res) => {
+
+    let query = req.body.query;
+
+    let value = [];
+
+    if(typeof query.id !== "undefined")
+    {
+        console.log("id")
+    }
+    else if(typeof query.category !== "undefined")
+    {
+        console.log("category")
+    }
+
+
+    console.log(req.body);
 
 });
 
