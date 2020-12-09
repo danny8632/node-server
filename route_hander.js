@@ -32,7 +32,7 @@ function routeListner(req, res) {
         query       = path.query,
         action      = getAction(req, pathname),
         header      = typeof req.headers['content-type'] == "undefined" ? '' : req.headers['content-type'].split(';')[0],
-        func_data   = { query, body : "" };
+        func_data   = { query, body : "", res };
 
     console.log(`IP => ${pathname}`);
 
@@ -47,7 +47,7 @@ function routeListner(req, res) {
 
         formdataParser.getFormData(req, (data) => {
             func_data['body'] = data;
-            return respond(res, { action, func_data })
+            return respond({ action, func_data })
         });
     }
     else if (action.isFile && splitpath.length > 1)
@@ -74,7 +74,7 @@ function routeListner(req, res) {
     }
     else
     {
-        return respond(res, { action, func_data })
+        return respond({ action, func_data })
     }
 }
 
@@ -98,9 +98,10 @@ function getAction(req, path) {
 
 
 
-function respond(res, { action, func_data = {} }) {
-    res.writeHead(action.status, STATUSNAMES[action.status], action.header);
-    res.end(action.func(func_data));
+function respond({ action, func_data }) {
+    func_data.res.writeHead(action.status, STATUSNAMES[action.status], action.header);
+    //res.end(action.func(func_data));
+    action.func(func_data);
 }
 
 
