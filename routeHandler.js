@@ -125,21 +125,27 @@ function handleFunction(req, res) {
             res.end(JSON.stringify(data));
         }
 
-        let header = typeof req.headers['content-type'] === "undefined" ? '' : req.headers['content-type'].split(';')[0];
+        try {
+            let header = typeof req.headers['content-type'] === "undefined" ? '' : req.headers['content-type'].split(';')[0];
 
-        if(header === "multipart/form-data" || header === "application/x-www-form-urlencoded" || header === "application/json")
-        {
-            const form = formidable({ multiples: true, uploadDir: "./images", keepExtensions : true});
-     
-            form.parse(req, (err, fields, files) => {
-                req.body['fields'] = fields;
-                req.body['files'] = files[''];
+            console.log(header)
+
+            if(header === "multipart/form-data" || header === "application/x-www-form-urlencoded" || header === "application/json")
+            {
+                const form = formidable({ multiples: true, uploadDir: "./images", keepExtensions : true});
+        
+                form.parse(req, (err, fields, files) => {
+                    req.body['fields'] = fields;
+                    req.body['files'] = files[''];
+                    return func.func(req, res);
+                });
+            }
+            else
+            {
                 return func.func(req, res);
-            });
-        }
-        else
-        {
-            return func.func(req, res);
+            }
+        } catch (e) {
+            console.log(e);
         }
     }
 }
