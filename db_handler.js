@@ -10,7 +10,10 @@ const connectionData = {
 }
 
 
-var connection = mysql.createConnection(connectionData);
+var connection = mysql.createConnection(connectionData).connect(function (err) {
+    if (err) throw err;
+    console.log("Connected!");
+});;
 
 function queryDatabase(queryStr, cb) {
 
@@ -25,9 +28,9 @@ function authenticate(username, password, cb) {
 
     queryDatabase(sql, (error, results, fields) => {
 
-        if(error) return cb({success : false, error : error.sqlMessage}, "");
+        if (error) return cb({ success: false, error: error.sqlMessage }, "");
 
-        if(results.length == 0 || typeof results[0].id === "undefined") return cb({success : false, "error" : "wrong login"}, "");
+        if (results.length == 0 || typeof results[0].id === "undefined") return cb({ success: false, "error": "wrong login" }, "");
 
         let userId = results[0].id;
 
@@ -39,10 +42,10 @@ function authenticate(username, password, cb) {
         );
 
         queryDatabase(sql, (error, results, fields) => {
-            
-            if(error) return cb({success : false, "error" : error.sqlMessage}, "");
 
-            return cb("", { success : true, token : hash })
+            if (error) return cb({ success: false, "error": error.sqlMessage }, "");
+
+            return cb("", { success: true, token: hash })
         });
     });
 }
@@ -52,22 +55,20 @@ function validateToken(authToken, cb) {
 
     let sql = mysql.format("SELECT id, userId, expires FROM UserToken WHERE token = ?;", [authToken]);
 
-    queryDatabase(sql, (error, results, fields) => { 
+    queryDatabase(sql, (error, results, fields) => {
 
-        if(error || results.length <= 0 || typeof results[0].expires === "undefined") return cb(false, 0);
+        if (error || results.length <= 0 || typeof results[0].expires === "undefined") return cb(false, 0);
 
         let expire = new Date(results[0].expires).getTime();
 
         //  Expired..
-        if(expire <= new Date().getTime())
-        {
+        if (expire <= new Date().getTime()) {
             sql = mysql.format("DELETE FROM UserToken WHERE token = ? LIMIT 1;", [authToken]);
             queryDatabase(sql, (error, results, fields) => {
                 return cb(false, results[0].userId);
             });
         }
-        else
-        {
+        else {
             cb(true, results[0].userId);
         }
     })
