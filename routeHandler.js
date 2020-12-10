@@ -38,15 +38,9 @@ const server = http.createServer((req, res) => {
 
     if(typeof functions[method][pathname] === "undefined")
     {
-        console.log("before here")
-
         if(method === "GET" && splitpath.length > 0)
         {
-            console.log("here")
-
             const newPath = splitpath.slice(0, (splitpath.length - 1)).join("/");
-
-            console.log(newPath);
 
             if(typeof functions['STATIC'][newPath] !== "undefined")
             {
@@ -99,9 +93,7 @@ function handleFunction(req, res) {
 
     let func = functions[req.body.method][req.body.pathname];
 
-    console.log(req.method)
-
-    if(req.method === "STATIC")
+    if(req.body.method === "STATIC")
     {
         let file_dir = `./${func}/${req.body.filename}`;
 
