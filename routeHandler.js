@@ -93,6 +93,8 @@ function handleFunction(req, res) {
 
     let func = functions[req.body.method][req.body.pathname];
 
+    console.log(req.method)
+
     if(req.method === "STATIC")
     {
         let file_dir = `./${func}/${req.body.filename}`;
