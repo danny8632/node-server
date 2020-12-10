@@ -23,20 +23,39 @@ app.get("/product", (req, res) => {
 
     let query = req.body.query;
 
-    let value = [];
+    let sql = "SELECT * FROM ProductsView";
+
+    let values = [];
 
     if(typeof query.id !== "undefined")
     {
-        console.log("id")
+        sql = "SELECT * FROM ProductsView WHERE id = ?";
+        values.push(query.id);
     }
     else if(typeof query.category !== "undefined")
     {
-        console.log("category")
+        sql = "SELECT ProductsView.* FROM ProductCategories AS cad INNER JOIN ProductsView ON ProductsView.id = cad.productId WHERE cad.categoryId = ?";
+        values.push(query.category);
+    }
+    
+    if(typeof query.size !== "undefined")
+    {
+        sql += " LIMIT ?;";
+        values.push(query.size);
     }
 
+    if(values.length > 0) sql = mysql.format(sql, values);
 
-    console.log(req.body);
+    dbHandler.queryDatabase(sql, (error, results) => {
 
+        if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+        return res.send({
+            success : true,
+            results
+        })
+
+    });
 });
 
 app.post("/product", (req, res) => {
@@ -66,6 +85,55 @@ app.post("/product", (req, res) => {
     
 }, true);
 
+app.put("/product", (req, res) => {
+
+    const fields = req.body.fields;
+    const keys = Object.keys(fields);
+
+    let sql_arr = [];
+    let values = [];
+
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const field = fields[key];
+
+        if(keys[i].toLowerCase() == "id" || keys[i].toLowerCase() == "productId") continue;
+        
+        sql_arr.push(`${key} = ?`);
+        values.push(field);
+    }
+
+    values.push(fields.id);
+
+    let sql = `UPDATE DinMarkedsplads.Products SET ${sql_arr.join(", ")} WHERE id = ?;`;
+
+    sql = mysql.format(sql, values);
+
+    dbHandler.queryDatabase(sql, (error) => {
+
+        if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+        return res.send({
+            success : true
+        })
+    });
+
+}, true)
+
+app.delete("/product", (req, res) => {
+
+    sql = mysql.format("DELETE FROM DinMarkedsplads.Products WHERE id = ?", [req.body.fields.id]);
+
+    dbHandler.queryDatabase(sql, (error) => {
+
+        if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+        return res.send({
+            success : true
+        })
+    });
+
+}, true)
 
 /*  ------------------------------  */
 /*           END product            */

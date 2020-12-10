@@ -162,6 +162,13 @@ function post(path, func, requireToken = false) {
     functions['POST'][path] = { func, requireToken };
 }
 
+function put(path, func, requireToken = false) {
+    functions['PUT'][path] = { func, requireToken };
+}
+
+function del(path, func, requireToken = false) {
+    functions['DELETE'][path] = { func, requireToken };
+}
 
 function listen(port, cb) {
     server.listen(port);
@@ -173,3 +180,5 @@ module.exports.listen = listen;
 module.exports.static = static;
 module.exports.get = get;
 module.exports.post = post;
+module.exports.put = put;
+module.exports.delete = del;
