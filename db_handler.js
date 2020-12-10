@@ -10,10 +10,7 @@ const connectionData = {
 }
 
 
-var connection = mysql.createConnection(connectionData).connect(function (err) {
-    if (err) throw err;
-    console.log("Connected!");
-});;
+var connection = mysql.createConnection(connectionData);
 
 function queryDatabase(queryStr, cb) {
 
