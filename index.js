@@ -5,16 +5,6 @@ const app = require('./routeHandler');
 
 
 
-app.get("/gemme", (req, res) => {
-    //console.log(req.body);
-    console.log(req.headers)
-    
-    console.log("\n",req.headers.authorization, "\n")
-
-    res.send({"gemme" : "YES"});
-});
-
-
 /*  ------------------------------  */
 /*             product              */
 /*  ------------------------------  */
@@ -135,11 +125,6 @@ app.delete("/product", (req, res) => {
 
 }, true)
 
-/*  ------------------------------  */
-/*           END product            */
-/*  ------------------------------  */
-
-
 
 /*  ------------------------------  */
 /*            USER AUTH             */
@@ -175,10 +160,63 @@ app.post("/user/singup", (req, res) => {
     })
 });
 
+
 /*  ------------------------------  */
-/*         END USER AUTH            */
+/*             COMMENTS             */
 /*  ------------------------------  */
 
+app.get("/comment", (req, res) => {
+
+    let id = req.body.query.id;
+
+    if(typeof id === "undefined") return res.send({success : false, "error" : "no id was parsed"});
+
+    sql = mysql.format("SELECT com.id AS 'id', com.productId AS 'productId', com.userId AS 'userId', Users.username AS 'username', com.subComment AS 'subComment', com.`comment` AS 'comment' FROM Comments AS com INNER JOIN Users ON com.userId = Users.id WHERE com.productId = ?;", [id]);
+
+    dbHandler.queryDatabase(sql, (error, results) => {
+
+        if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+        return res.send({
+            success : true,
+            results
+        })
+    });
+});
+
+app.post("/comment", (req, res) => {
+
+    let values = [
+        req.body.query.id
+    ];
+
+    if(typeof id === "undefined") return res.send({success : false, "error" : "no id was parsed"});
+
+    sql = mysql.format("SELECT com.id AS 'id', com.productId AS 'productId', com.userId AS 'userId', Users.username AS 'username', com.subComment AS 'subComment', com.`comment` AS 'comment' FROM Comments AS com INNER JOIN Users ON com.userId = Users.id WHERE com.productId = ?;", [id]);
+
+    dbHandler.queryDatabase(sql, (error, results) => {
+
+        if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+        return res.send({
+            success : true,
+            results
+        })
+    });
+
+}, true);
+
+app.put("/comment", (req, res) => {
+
+}, true);
+
+app.delete("/comment", (req, res) => {
+
+}, true);
+
+/*  ------------------------------  */
+/*          Static files            */
+/*  ------------------------------  */
 
 app.static("/static", "images");
 
