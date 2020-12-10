@@ -38,9 +38,15 @@ const server = http.createServer((req, res) => {
 
     if(typeof functions[method][pathname] === "undefined")
     {
+        console.log("before here")
+
         if(method === "GET" && splitpath.length > 0)
         {
+            console.log("here")
+
             const newPath = splitpath.slice(0, (splitpath.length - 1)).join("/");
+
+            console.log(newPath);
 
             if(typeof functions['STATIC'][newPath] !== "undefined")
             {
