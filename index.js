@@ -188,17 +188,28 @@ app.post("/user/singup", (req, res) => {
     let username = req.body.fields.username;
     let password = req.body.fields.password;
 
-    let sql = mysql.format("INSERT INTO DinMarkedsplads.Users (username, password) VALUES(?, ?);", [username, password]);
+    let sql = mysql.format("SELECT id FROM Users WHERE username = ? LIMIT 1;", [username]);
 
     dbHandler.queryDatabase(sql, (error, results, fields) => {
 
         if(error) return res.send({success : false, error : error.sqlMessage});
 
-        res.send({
-            success : true,
-            id : results.insertId
-        });
+        if(results.length > 0) return res.send({success : false, error : "Username already taken!"});
+
+        sql = mysql.format("INSERT INTO DinMarkedsplads.Users (username, password) VALUES(?, ?);", [username, password]);
+    
+        dbHandler.queryDatabase(sql, (error, results, fields) => {
+    
+            if(error) return res.send({success : false, error : error.sqlMessage});
+    
+            res.send({
+                success : true,
+                id : results.insertId
+            });
+        })
     })
+    
+    
 });
 
 
