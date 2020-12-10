@@ -156,8 +156,16 @@ app.delete("/product", (req, res) => {
 /*  ------------------------------  */
 
 app.post("/user/login", (req, res) => {
-    let username = req.body.fields.username;
-    let password = req.body.fields.password;
+
+    console.log(req.body)
+
+    let fields = req.body.fields;
+
+    if(typeof fields === "undefined" || typeof fields.username === "undefined" || typeof fields.password === "undefined") 
+        return res.send({success : false, error : "empty password or username"});
+
+    let username = fields.username;
+    let password = fields.password;
 
     dbHandler.authenticate(username, password, (error, result) => {
 

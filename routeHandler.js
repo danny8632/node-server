@@ -120,12 +120,14 @@ function handleFunction(req, res) {
     {
         res.writeHead(200, {'Content-Type': "application/json"});
         res.send = (data) => {
+            console.log("\n Returns => ", data, "\n");
+
             res.end(JSON.stringify(data));
         }
 
         let header = typeof req.headers['content-type'] === "undefined" ? '' : req.headers['content-type'].split(';')[0];
 
-        if(header === "multipart/form-data" || header === "application/x-www-form-urlencoded")
+        if(header === "multipart/form-data" || header === "application/x-www-form-urlencoded" || header === "application/json")
         {
             const form = formidable({ multiples: true, uploadDir: "./images", keepExtensions : true});
      
