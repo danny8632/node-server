@@ -27,6 +27,11 @@ app.get("/product", (req, res) => {
         sql = "SELECT ProductsView.* FROM ProductCategories AS cad INNER JOIN ProductsView ON ProductsView.id = cad.productId WHERE cad.categoryId = ?";
         values.push(query.category);
     }
+    else if(typeof query.userId !== "undefined")
+    {
+        sql = "SELECT * FROM ProductsView WHERE userId = ?";
+        values.push(query.id);
+    }
     
     if(typeof query.size !== "undefined")
     {
