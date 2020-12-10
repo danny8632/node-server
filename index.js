@@ -284,7 +284,7 @@ app.delete("/comment", (req, res) => {
 /*             COMMENTS             */
 /*  ------------------------------  */
 
-app.get("/comment", (req, res) => {
+app.get("/category", (req, res) => {
 
     sql = "SELECT id, name FROM DinMarkedsplads.Categories;";
 
