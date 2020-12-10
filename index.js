@@ -91,10 +91,18 @@ app.post("/product", (req, res) => {
 
             if(error) return res.send({success : false, "error" : error.sqlMessage});
 
-            res.send({
-                success : true,
-                id : postid
+            sql = mysql.format("SELECT * FROM ProductsView WHERE id = ?", [postid]);
+
+            dbHandler.queryDatabase(sql, (error, results, fields) => {
+
+                if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+                res.send({
+                    success : true,
+                    results
+                });
             });
+
         });
     })
     
