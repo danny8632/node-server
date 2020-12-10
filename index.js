@@ -55,6 +55,8 @@ app.get("/product", (req, res) => {
 
 app.post("/product", (req, res) => {
 
+    console.log(req.body);
+
     let images = req.body.files.map(file => file.path.split("/")[1]);
 
     let data = [
