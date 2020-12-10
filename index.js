@@ -50,26 +50,51 @@ app.get("/product", (req, res) => {
 
 app.post("/product", (req, res) => {
 
+    let images = req.body.files.map(file => file.path.split("/")[1]);
+
     let data = [
         req.body.userID,
         req.body.fields.title,
         req.body.fields.price,
-        req.body.files.map(file => file.path.split("/")[1]).join(","),
         req.body.fields.description,
         req.body.fields.address,
         req.body.fields.zipcode,
         req.body.fields.region,
     ];
 
-    let sql = mysql.format("INSERT INTO DinMarkedsplads.Products (userId, title, price, images, description, address, zipcode, region) VALUES(?,?,?,?,?,?,?,?);", data);
+    let sql = mysql.format("INSERT INTO DinMarkedsplads.Products (userId, title, price, description, address, zipcode, region) VALUES(?,?,?,?,?,?,?);", data);
 
     dbHandler.queryDatabase(sql, (error, results, fields) => {
 
         if(error) return res.send({success : false, "error" : error.sqlMessage});
 
-        res.send({
-            success : true,
-            id : results.insertId
+        let postid = results.insertId;
+        data = [];
+
+        sql = "INSERT INTO DinMarkedsplads.ProductAssets (productId, image) VALUES";
+
+        for (let i = 0; i < images.length; i++) {
+            const image = images[i];
+            data.push(postid, image);
+
+            if(i == 0)
+                sql += " (?,?)";
+            else
+                sql += ", (?,?)";
+        }
+
+        sql = mysql.format(sql, data);
+
+        console.log(sql);
+
+        dbHandler.queryDatabase(sql, (error, results, fields) => {
+
+            if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+            res.send({
+                success : true,
+                id : postid
+            });
         });
     })
     
@@ -93,9 +118,9 @@ app.put("/product", (req, res) => {
         values.push(field);
     }
 
-    values.push(fields.id);
+    values.push(fields.id, req.body.userID);
 
-    let sql = `UPDATE DinMarkedsplads.Products SET ${sql_arr.join(", ")} WHERE id = ?;`;
+    let sql = `UPDATE DinMarkedsplads.Products SET ${sql_arr.join(", ")} WHERE id = ? AND userId = ?;`;
 
     sql = mysql.format(sql, values);
 
@@ -112,7 +137,7 @@ app.put("/product", (req, res) => {
 
 app.delete("/product", (req, res) => {
 
-    sql = mysql.format("DELETE FROM DinMarkedsplads.Products WHERE id = ?", [req.body.fields.id]);
+    sql = mysql.format("DELETE FROM DinMarkedsplads.Products WHERE id = ? AND userId = ?;", [req.body.fields.id, req.body.userID]);
 
     dbHandler.queryDatabase(sql, (error) => {
 
@@ -186,13 +211,74 @@ app.get("/comment", (req, res) => {
 
 app.post("/comment", (req, res) => {
 
-    let values = [
-        req.body.query.id
-    ];
+    let id          = req.body.fields.id;
+    let userId      = req.body.userID;
+    let subComment  = typeof req.body.fields.subComment === "undefined" ? null : req.body.fields.subComment;
+    let text = req.body.fields.comment
 
     if(typeof id === "undefined") return res.send({success : false, "error" : "no id was parsed"});
 
-    sql = mysql.format("SELECT com.id AS 'id', com.productId AS 'productId', com.userId AS 'userId', Users.username AS 'username', com.subComment AS 'subComment', com.`comment` AS 'comment' FROM Comments AS com INNER JOIN Users ON com.userId = Users.id WHERE com.productId = ?;", [id]);
+    sql = mysql.format("INSERT INTO DinMarkedsplads.Comments (productId, userId, subComment, comment) VALUES(?,?,?,?);", [id, userId, subComment, text]);
+
+    dbHandler.queryDatabase(sql, (error, results) => {
+
+        if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+        return res.send({
+            success : true
+        })
+    });
+
+}, true);
+
+app.put("/comment", (req, res) => {
+
+    let id = req.body.fields.id;
+    let text = req.body.fields.comment;
+
+    if(typeof id === "undefined" || typeof text === "undefined") return res.send({success : false, "error" : "text or id was undefined"});
+
+    sql = mysql.format("UPDATE DinMarkedsplads.Comments SET comment=? WHERE id = ? AND userId = ?;", [text, id, req.body.userID]);
+
+    dbHandler.queryDatabase(sql, (error, results) => {
+
+        if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+        return res.send({
+            success : true
+        })
+    });
+
+
+}, true);
+
+app.delete("/comment", (req, res) => {
+
+    let id = req.body.fields.id;
+
+    if(typeof id === "undefined") return res.send({success : false, "error" : "no id was parsed"});
+
+    sql = mysql.format("DELETE FROM DinMarkedsplads.Comments id=? AND userId = ?;", [id, req.body.userID]);
+
+    dbHandler.queryDatabase(sql, (error, results) => {
+
+        if(error) return res.send({success : false, "error" : error.sqlMessage});
+
+        return res.send({
+            success : true
+        })
+    });
+
+}, true);
+
+
+/*  ------------------------------  */
+/*             COMMENTS             */
+/*  ------------------------------  */
+
+app.get("/comment", (req, res) => {
+
+    sql = "SELECT id, name FROM DinMarkedsplads.Categories;";
 
     dbHandler.queryDatabase(sql, (error, results) => {
 
@@ -203,16 +289,8 @@ app.post("/comment", (req, res) => {
             results
         })
     });
+});
 
-}, true);
-
-app.put("/comment", (req, res) => {
-
-}, true);
-
-app.delete("/comment", (req, res) => {
-
-}, true);
 
 /*  ------------------------------  */
 /*          Static files            */
