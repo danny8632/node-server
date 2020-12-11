@@ -136,7 +136,12 @@ function handleFunction(req, res) {
         
                 form.parse(req, (err, fields, files) => {
                     req.body['fields'] = fields;
-                    req.body['files'] = files[''];
+                    req.body['files'] = [];
+
+                    for (const key in files) {
+                        req.body['files'].push(files[key]);
+                    }
+                    
                     return func.func(req, res);
                 });
             }
